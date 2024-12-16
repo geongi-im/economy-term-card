@@ -14,6 +14,20 @@ def get_image_url(file_path):
     base_url = f'{os.getenv("DOMAIN_URL")}/output'
     return f"{base_url}/{os.path.basename(file_path)}"
 
+def get_unique_filename(output_path):
+    """중복되지 않는 파일명 생성"""
+    if not os.path.exists(output_path):
+        return output_path
+    
+    base_name, extension = os.path.splitext(output_path)
+    index = 1
+    
+    while True:
+        new_path = f"{base_name}({index}){extension}"
+        if not os.path.exists(new_path):
+            return new_path
+        index += 1
+
 def main():
     # output 폴더 초기화
     os.makedirs("output", exist_ok=True)
@@ -48,7 +62,10 @@ def main():
         long_content = term[3]
 
         today = datetime.now().strftime('%Y%m%d')
-        output_path = f"output/{today}_{no}.png"
+        base_output_path = f"output/{today}_{no}.png"
+        
+        # 중복 파일명 처리
+        output_path = get_unique_filename(base_output_path)
 
         # 이미지 생성
         processor.create_card(
