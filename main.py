@@ -3,6 +3,7 @@ from datetime import datetime
 from image_processor import ImageProcessor
 from database_manager import DatabaseManager
 from instagram_post import InstagramAPI
+from telegram_util import TelegramUtil
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -21,6 +22,7 @@ def main():
     processor = ImageProcessor()
     db_manager = DatabaseManager()
     instagram_api = InstagramAPI()
+    telegram = TelegramUtil()
     
     term_list = db_manager.get_random_term()
     image_paths = []  # 생성된 이미지 경로를 저장할 리스트
@@ -64,7 +66,7 @@ def main():
         print(f"이미지 생성 완료: {output_path}")
 
     # 이미지 URL 생성 (표지 이미지 포함)
-    image_urls = [get_image_url(path) for path in image_paths]
+    image_urls = [get_image_url(path) for path in image_paths]    
     
     # Instagram 포스팅
     try:
@@ -82,6 +84,15 @@ def main():
             for idx, output_path in term_updates:
                 db_manager.update_term_list(idx, output_path)
                 print(f"DB 업데이트 완료: ID {idx}")
+                
+            # Instagram 포스팅 성공 후 텔레그램으로 이미지 전송
+            try:
+                telegram_caption = f"{datetime.now().strftime('%Y-%m-%d')} 경제용어카드 포스팅 완료\n\n{caption}"
+                telegram.send_multiple_photo(image_paths, caption=telegram_caption)
+                print("텔레그램 전송 완료!")
+            except Exception as e:
+                print(f"텔레그램 전송 실패: {str(e)}")
+                
         else:
             print(f"Instagram 포스팅 실패: {result['error']}")
             
