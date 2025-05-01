@@ -31,16 +31,27 @@ def get_unique_filename(output_path):
             return new_path
         index += 1
 
+def clear_output_folder():
+    """output 폴더 내 모든 파일 삭제"""
+    if os.path.exists("output"):
+        for file_name in os.listdir("output"):
+            file_path = os.path.join("output", file_name)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+                logger.info(f"삭제됨: {file_path}")
+
 def main():
     # output 폴더 초기화
     os.makedirs("output", exist_ok=True)
+    # 기존 이미지 파일 모두 삭제
+    logger = LoggerUtil().get_logger()
+    clear_output_folder()
     os.chmod("output", 0o777)  # 폴더 권한을 777로 설정
 
     processor = ImageProcessor()
     db_manager = DatabaseManager(db_path='term.db')
     telegram = TelegramUtil()
     api_util = ApiUtil()
-    logger = LoggerUtil().get_logger()
     term_list = db_manager.get_random_term()
     image_paths = []  # 생성된 이미지 경로를 저장할 리스트
     term_updates = []  # DB 업데이트를 위한 정보를 저장할 리스트
@@ -87,7 +98,7 @@ def main():
         image_paths.append(output_path)
         term_updates.append((idx, output_path))
 
-        print(f"이미지 생성 완료: {output_path}")
+        logger.info(f"이미지 생성 완료: {output_path}")
 
     # 이미지 URL 생성 (표지 이미지 포함)
     # image_urls = [get_image_url(path) for path in image_paths]
@@ -123,7 +134,7 @@ def main():
     # DB 업데이트
     for idx, output_path in term_updates:
         db_manager.update_term_list(idx, output_path)
-        print(f"DB 업데이트 완료: ID {idx}")
+        logger.info(f"DB 업데이트 완료: ID {idx}")
 
 if __name__ == "__main__":
     main()

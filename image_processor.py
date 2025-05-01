@@ -1,11 +1,13 @@
 import os
 from PIL import Image, ImageDraw, ImageFont
 import textwrap
+from utils.logger_util import LoggerUtil
 
 class ImageProcessor:
     def __init__(self):
         """이미지 카드 생성기 초기화"""
         self.background_path = os.path.join('img', 'background_card.png')
+        self.logger = LoggerUtil().get_logger()
 
     def _get_unique_filename(self, base_path):
         """파일명이 중복될 경우 인덱스를 붙여 고유한 파일명 생성"""
@@ -114,7 +116,7 @@ class ImageProcessor:
                     return font, wrapped_text
                 
             except Exception as e:
-                print(f"폰트 크기 조정 중 오류 발생: {e}")
+                self.logger.error(f"폰트 크기 조정 중 오류 발생: {e}")
                 if font_size == initial_size:
                     font = ImageFont.load_default()
                     return font, text
@@ -187,7 +189,7 @@ class ImageProcessor:
         try:
             img = Image.open(self.background_path)
         except FileNotFoundError:
-            print("배경 이미지를 찾을 수 없습니다.")
+            self.logger.error("배경 이미지를 찾을 수 없습니다.")
             return
         
         draw = ImageDraw.Draw(img)
@@ -235,14 +237,15 @@ class ImageProcessor:
         img.save(unique_output_path)
 
 def main():
+    logger = LoggerUtil().get_logger()
     no = 1
     term = '매매'
     short_description = '값을 지불하고 재화나 용역을 사고 파는 것'
     description = '우리가 사용하는 당근 어플에서 중고 거래를 하는 것도 매매의 일종이에요.'
 
-    print(f'term: {term}')
-    print(f'short_description: {short_description}')
-    print(f'description: {description}')
+    logger.info(f'term: {term}')
+    logger.info(f'short_description: {short_description}')
+    logger.info(f'description: {description}')
 
     processor = ImageProcessor()
     processor.create_card(
