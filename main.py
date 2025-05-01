@@ -31,23 +31,8 @@ def get_unique_filename(output_path):
             return new_path
         index += 1
 
-def clear_output_folder():
-    """output 폴더 내 모든 파일 삭제"""
-    if os.path.exists("output"):
-        for file_name in os.listdir("output"):
-            file_path = os.path.join("output", file_name)
-            if os.path.isfile(file_path):
-                os.remove(file_path)
-                logger.info(f"삭제됨: {file_path}")
-
 def main():
-    # output 폴더 초기화
-    os.makedirs("output", exist_ok=True)
-    # 기존 이미지 파일 모두 삭제
     logger = LoggerUtil().get_logger()
-    clear_output_folder()
-    os.chmod("output", 0o777)  # 폴더 권한을 777로 설정
-
     processor = ImageProcessor()
     db_manager = DatabaseManager(db_path='term.db')
     telegram = TelegramUtil()
@@ -56,6 +41,18 @@ def main():
     image_paths = []  # 생성된 이미지 경로를 저장할 리스트
     term_updates = []  # DB 업데이트를 위한 정보를 저장할 리스트
     terms = []  # 용어 목록을 저장할 리스트
+
+     # output 폴더 초기화
+    os.makedirs("output", exist_ok=True)
+    os.chmod("output", 0o777)  # 폴더 권한을 777로 설정
+
+    # 기존 이미지 파일 모두 삭제   
+    if os.path.exists("output"):
+        for file_name in os.listdir("output"):
+            file_path = os.path.join("output", file_name)
+            if os.path.isfile(file_path):
+                os.remove(file_path)
+                logger.info(f"삭제됨: {file_path}")
 
     # 표지 이미지 경로 추가
     main_image_path = "output/main.png"
