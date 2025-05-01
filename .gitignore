@@ -41,7 +41,6 @@ output/
 *.psd
 
 # Database
-*.db
 *.sqlite3
 *.sqlite
 
@@ -66,3 +65,6 @@ Thumbs.db
 # Local configuration
 config.ini
 settings.json 
+
+# etc
+old/*
