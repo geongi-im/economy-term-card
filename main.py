@@ -90,7 +90,7 @@ def main():
         print(f"이미지 생성 완료: {output_path}")
 
     # 이미지 URL 생성 (표지 이미지 포함)
-    image_urls = [get_image_url(path) for path in image_paths]
+    # image_urls = [get_image_url(path) for path in image_paths]
 
     # API 전송
     today = datetime.now().strftime('%Y-%m-%d')
