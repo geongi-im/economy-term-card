@@ -177,7 +177,7 @@ class ImageProcessor:
             fill=text_color
         )
 
-    def create_card(self, no, title, short_content, long_content, output_path):
+    def create_card(self, no, term, short_description, description, output_path):
         """카드 이미지 생성"""
 
         sb_aggro_m_font_path = os.path.join('fonts', 'SB-Aggro-Medium.ttf')
@@ -194,33 +194,33 @@ class ImageProcessor:
         width, height = img.size
 
         # 타이틀 폰트 및 텍스트 설정
-        title_font, title_text = self._get_optimal_font_size(title, 750, 200, sb_aggro_b_font_path, 165)
+        term_font, term_text = self._get_optimal_font_size(term, 750, 200, sb_aggro_b_font_path, 165)
         self._draw_text(
             draw, 
-            title_text, 
-            title_font, 
+            term_text, 
+            term_font, 
             width, 
             start_y=260, 
             fill=(174, 151, 116)
         )
 
         # 짧은 설명 폰트 설정
-        short_content_font, short_content_text = self._get_optimal_font_size(short_content, 780, 100, sb_aggro_m_font_path, 38)
+        short_description_font, short_description_text = self._get_optimal_font_size(short_description, 780, 100, sb_aggro_m_font_path, 38)
         self._draw_multiline_text(
             draw, 
-            short_content_text, 
-            short_content_font, 
+            short_description_text, 
+            short_description_font, 
             width, 
             start_y=480, 
             fill=(180, 159, 126)
         )
 
         # 긴 설명 폰트 설정
-        long_content_font, long_content_text = self._get_optimal_font_size(long_content, 700, 200, gm_sans_b_font_path, 36)
+        description_font, description_text = self._get_optimal_font_size(description, 700, 200, gm_sans_b_font_path, 36)
         self._draw_content_box(
             draw=draw,
-            text=long_content_text,
-            font=long_content_font,
+            text=description_text,
+            font=description_font,
             width=width,
             start_y=630,
             text_color=(255, 255, 255),
@@ -236,20 +236,20 @@ class ImageProcessor:
 
 def main():
     no = 1
-    title = '매매'
-    short_content = '값을 지불하고 재화나 용역을 사고 파는 것'
-    long_content = '우리가 사용하는 당근 어플에서 중고 거래를 하는 것도 매매의 일종이에요.'
+    term = '매매'
+    short_description = '값을 지불하고 재화나 용역을 사고 파는 것'
+    description = '우리가 사용하는 당근 어플에서 중고 거래를 하는 것도 매매의 일종이에요.'
 
-    print(f'title: {title}')
-    print(f'short_content: {short_content}')
-    print(f'long_content: {long_content}')
+    print(f'term: {term}')
+    print(f'short_description: {short_description}')
+    print(f'description: {description}')
 
     processor = ImageProcessor()
     processor.create_card(
         no=no,
-        title=title,
-        short_content=short_content,
-        long_content=long_content,
+        term=term,
+        short_description=short_description,
+        description=description,
         output_path="output.png"
     )
 

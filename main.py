@@ -2,8 +2,11 @@ import os
 from datetime import datetime
 from image_processor import ImageProcessor
 from database_manager import DatabaseManager
-from instagram_post import InstagramAPI
-from telegram_util import TelegramUtil
+from utils.instagram_post import InstagramAPI
+from utils.telegram_util import TelegramUtil
+from utils.ncafe_post import NaverCafeAPI
+from utils.api_util import ApiUtil, ApiError
+from utils.logger_util import LoggerUtil
 from dotenv import load_dotenv
 
 load_dotenv()
@@ -34,13 +37,14 @@ def main():
     os.chmod("output", 0o777)  # 폴더 권한을 777로 설정
 
     processor = ImageProcessor()
-    db_manager = DatabaseManager()
-    instagram_api = InstagramAPI()
+    db_manager = DatabaseManager(db_path='term.db')
     telegram = TelegramUtil()
-    
+    api_util = ApiUtil()
+    logger = LoggerUtil().get_logger()
     term_list = db_manager.get_random_term()
     image_paths = []  # 생성된 이미지 경로를 저장할 리스트
     term_updates = []  # DB 업데이트를 위한 정보를 저장할 리스트
+    terms = []  # 용어 목록을 저장할 리스트
 
     # 표지 이미지 경로 추가
     main_image_path = "output/main.png"
@@ -54,12 +58,15 @@ def main():
     image_paths.append(main_image_path)
 
     # 이미지 생성
-    for no, term in enumerate(term_list):
+    for no, data in enumerate(term_list):
         no = f"{no + 1:02}"
-        idx = term[0]
-        title = term[1]
-        short_content = term[2]
-        long_content = term[3]
+        idx = data[0]
+        term = data[1]
+        short_description = data[2]
+        description = data[3]
+        
+        # 용어 목록에 추가
+        terms.append(term)
 
         today = datetime.now().strftime('%Y%m%d')
         base_output_path = f"output/{today}_{no}.png"
@@ -70,9 +77,9 @@ def main():
         # 이미지 생성
         processor.create_card(
             no=no,
-            title=title,
-            short_content=short_content,
-            long_content=long_content,
+            term=term,
+            short_description=short_description,
+            description=description,
             output_path=output_path
         )
         
@@ -84,37 +91,39 @@ def main():
 
     # 이미지 URL 생성 (표지 이미지 포함)
     image_urls = [get_image_url(path) for path in image_paths]
-    
-    # Instagram 포스팅
-    try:
-        caption = f"""우리 아이가 알아야 할 오늘의 경제용어
 
-{' '.join([f'#{term[1]}' for term in term_list])} #MQway #경제교육 #아이와함께 #오늘의경제"""
-        
-        result = instagram_api.post_image(image_urls, caption=caption)
-        
-        if result["success"]:
-            print("Instagram 포스팅 성공!")
-            print(f"Post ID: {result['post_id']}")
-            
-            # DB 업데이트
-            for idx, output_path in term_updates:
-                db_manager.update_term_list(idx, output_path)
-                print(f"DB 업데이트 완료: ID {idx}")
-                
-            # Instagram 포스팅 성공 후 텔레그램으로 이미지 전송
-            try:
-                telegram_caption = f"{datetime.now().strftime('%Y-%m-%d')} 경제용어카드 포스팅 완료\n\n{caption}"
-                telegram.send_multiple_photo(image_paths, caption=telegram_caption)
-                print("텔레그램 전송 완료!")
-            except Exception as e:
-                print(f"텔레그램 전송 실패: {str(e)}")
-                
-        else:
-            print(f"Instagram 포스팅 실패: {result['error']}")
-            
-    except Exception as e:
-        print(f"오류 발생: {str(e)}")
+    # API 전송
+    today = datetime.now().strftime('%Y-%m-%d')
+    
+    # 모든 용어를 해시태그로 사용
+    term_hashtags = ' '.join([f"<a href=\"#\">#{term}</a>" for term in terms])
+    
+    try:
+        logger.info("API 포스트 생성 시작")
+        api_util.create_post(
+            title=f"{today} 오늘의 경제용어",
+            content=f"""<strong><h3>{today} 우리 아이가 알아야 할 오늘의 경제용어</h3></strong><br>
+            <p>
+                {term_hashtags} 
+                <a href="#">#경제교육</a> 
+                <a href="#">#아이와함께</a> 
+                <a href="#">#오늘의경제</a> 
+                <a href="#">#MQWAY</a> 
+            </p>""",
+            category="경제용어",
+            writer="admin",
+            image_paths=image_paths
+        )
+        logger.info("API 포스트 생성 완료")
+    except ApiError as e:
+        error_message = f"❌ API 오류 발생\n\n{e.message}"
+        telegram.send_test_message(error_message)
+        logger.error(f"API 포스트 생성 오류: {e.message}")
+
+    # DB 업데이트
+    for idx, output_path in term_updates:
+        db_manager.update_term_list(idx, output_path)
+        print(f"DB 업데이트 완료: ID {idx}")
 
 if __name__ == "__main__":
     main()

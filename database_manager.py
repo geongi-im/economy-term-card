@@ -41,9 +41,9 @@ class DatabaseManager:
         cursor.execute('''
         CREATE TABLE IF NOT EXISTS term_list (
             idx INTEGER PRIMARY KEY AUTOINCREMENT,
-            title TEXT,
-            short_content TEXT,
-            long_content TEXT,
+            term TEXT,
+            short_description TEXT,
+            description TEXT,
             file_name TEXT,
             open_yn INTEGER DEFAULT 1,
             reg_date TEXT
@@ -51,7 +51,7 @@ class DatabaseManager:
         ''')
 
     def _import_csv_data(self, cursor):
-        """CSV 파일에서 데이터 임포트 (title 기준 중복 제외)"""
+        """CSV 파일에서 데이터 임포트 (term 기준 중복 제외)"""
         csv_path = 'term.csv'
         if not os.path.exists(csv_path):
             print(f"경고: {csv_path} 파일을 찾을 수 없습니다.")
@@ -65,11 +65,11 @@ class DatabaseManager:
                 insert_count = 0
                 for row in csv_reader:
                     if len(row) == 3:  # 모든 필드가 있는 경우에만 처리
-                        # title 중복 체크
-                        cursor.execute('SELECT COUNT(*) FROM term_list WHERE title = ?', (row[0],))
+                        # term 중복 체크
+                        cursor.execute('SELECT COUNT(*) FROM term_list WHERE term = ?', (row[0],))
                         if cursor.fetchone()[0] == 0:  # 중복되지 않은 경우에만 삽입
                             cursor.execute('''
-                            INSERT INTO term_list (title, short_content, long_content)
+                            INSERT INTO term_list (term, short_description, description)
                             VALUES (?, ?, ?)
                             ''', (row[0], row[1], row[2]))
                             insert_count += 1
@@ -85,7 +85,7 @@ class DatabaseManager:
             with sqlite3.connect(self.db_path) as conn:
                 cursor = conn.cursor()
                 cursor.execute("""
-                    SELECT idx, title, short_content, long_content 
+                    SELECT idx, term, short_description, description 
                     FROM term_list 
                     WHERE open_yn = 1 AND file_name IS NULL 
                     ORDER BY RANDOM() 
