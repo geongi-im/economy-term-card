@@ -6,7 +6,9 @@ from utils.logger_util import LoggerUtil
 class ImageProcessor:
     def __init__(self):
         """이미지 카드 생성기 초기화"""
-        self.background_path = os.path.join('img', 'background_card.png')
+        # 스크립트의 절대 경로를 기준으로 기본 디렉토리 설정
+        self.base_dir = os.path.dirname(os.path.abspath(__file__))
+        self.background_path = os.path.join(self.base_dir, 'img', 'background_card.png')
         self.logger = LoggerUtil().get_logger()
 
     def _get_unique_filename(self, base_path):
@@ -182,9 +184,9 @@ class ImageProcessor:
     def create_card(self, no, term, short_description, description, output_path):
         """카드 이미지 생성"""
 
-        sb_aggro_m_font_path = os.path.join('fonts', 'SB-Aggro-Medium.ttf')
-        sb_aggro_b_font_path = os.path.join('fonts', 'SB-Aggro-Bold.ttf')
-        gm_sans_b_font_path = os.path.join('fonts', 'GmarketSansTTFBold.ttf')
+        sb_aggro_m_font_path = os.path.join(self.base_dir, 'fonts', 'SB-Aggro-Medium.ttf')
+        sb_aggro_b_font_path = os.path.join(self.base_dir, 'fonts', 'SB-Aggro-Bold.ttf')
+        gm_sans_b_font_path = os.path.join(self.base_dir, 'fonts', 'GmarketSansTTFBold.ttf')
 
         try:
             img = Image.open(self.background_path)
