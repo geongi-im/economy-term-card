@@ -11,6 +11,9 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+# 현재 스크립트의 절대 경로를 기준으로 기본 디렉토리 설정
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
 def get_image_url(file_path):
     """로컬 이미지 파일의 URL을 생성"""
     # 여기에 실제 이미지가 호스팅되는 베이스 URL을 입력해야 합니다
@@ -34,7 +37,7 @@ def get_unique_filename(output_path):
 def main():
     logger = LoggerUtil().get_logger()
     processor = ImageProcessor()
-    db_manager = DatabaseManager(db_path='term.db')
+    db_manager = DatabaseManager(db_path=os.path.join(BASE_DIR, 'term.db'))
     telegram = TelegramUtil()
     api_util = ApiUtil()
     term_list = db_manager.get_random_term()
@@ -42,25 +45,27 @@ def main():
     term_updates = []  # DB 업데이트를 위한 정보를 저장할 리스트
     terms = []  # 용어 목록을 저장할 리스트
 
-     # output 폴더 초기화
-    os.makedirs("output", exist_ok=True)
-    os.chmod("output", 0o777)  # 폴더 권한을 777로 설정
+     # output 폴더 초기화 (절대 경로 사용)
+    output_dir = os.path.join(BASE_DIR, "output")
+    os.makedirs(output_dir, exist_ok=True)
+    os.chmod(output_dir, 0o777)  # 폴더 권한을 777로 설정
 
     # 기존 이미지 파일 모두 삭제   
-    if os.path.exists("output"):
-        for file_name in os.listdir("output"):
-            file_path = os.path.join("output", file_name)
+    if os.path.exists(output_dir):
+        for file_name in os.listdir(output_dir):
+            file_path = os.path.join(output_dir, file_name)
             if os.path.isfile(file_path):
                 os.remove(file_path)
                 logger.info(f"삭제됨: {file_path}")
 
     # 표지 이미지 경로 추가
-    main_image_path = "output/main.png"
+    main_image_path = os.path.join(output_dir, "main.png")
     
     # 표지 이미지가 없으면 img/main.png를 output 폴더로 복사
     if not os.path.exists(main_image_path):
         import shutil
-        shutil.copy2("img/main.png", main_image_path)
+        source_image = os.path.join(BASE_DIR, "img", "main.png")
+        shutil.copy2(source_image, main_image_path)
     
     # 표지 이미지를 첫 번째로 추가
     image_paths.append(main_image_path)
@@ -77,7 +82,7 @@ def main():
         terms.append(term)
 
         today = datetime.now().strftime('%Y%m%d')
-        base_output_path = f"output/{today}_{no}.png"
+        base_output_path = os.path.join(output_dir, f"{today}_{no}.png")
         
         # 중복 파일명 처리
         output_path = get_unique_filename(base_output_path)
