@@ -69,4 +69,5 @@ settings.json
 # etc
 old/*
 
+term.db
 *.db
