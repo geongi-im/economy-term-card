@@ -10,7 +10,7 @@ db = DatabaseManager(db_path=db_path)
 logger = LoggerUtil().get_logger()
 
 # JSON 파일 경로
-json_path = os.path.join('source', '240714_3.json')
+json_path = os.path.join('source', '250714_3.json')
 
 # 사용자 입력 플래그
 global_skip = False
