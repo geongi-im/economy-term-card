@@ -58,18 +58,6 @@ def main():
                 os.remove(file_path)
                 logger.info(f"삭제됨: {file_path}")
 
-    # 표지 이미지 경로 추가
-    main_image_path = os.path.join(output_dir, "main.png")
-    
-    # 표지 이미지가 없으면 img/main.png를 output 폴더로 복사
-    if not os.path.exists(main_image_path):
-        import shutil
-        source_image = os.path.join(BASE_DIR, "img", "main.png")
-        shutil.copy2(source_image, main_image_path)
-    
-    # 표지 이미지를 첫 번째로 추가
-    image_paths.append(main_image_path)
-
     # 이미지 생성
     for no, data in enumerate(term_list):
         no = f"{no + 1:02}"
@@ -102,9 +90,6 @@ def main():
 
         logger.info(f"이미지 생성 완료: {output_path}")
 
-    # 이미지 URL 생성 (표지 이미지 포함)
-    # image_urls = [get_image_url(path) for path in image_paths]
-
     # API 전송
     today = datetime.now().strftime('%Y-%m-%d')
     
@@ -125,7 +110,8 @@ def main():
             </p>""",
             category="경제용어",
             writer="admin",
-            image_paths=image_paths
+            image_paths=image_paths,
+            thumbnail_image_path=os.path.join(os.path.dirname(os.path.abspath(__file__)), 'img', 'main.png')
         )
         logger.info("API 포스트 생성 완료")
     except ApiError as e:
