@@ -58,9 +58,11 @@ pip install -r requirements.txt
 4. 환경 변수 설정:
 `.env` 파일을 생성하고 다음 내용을 추가합니다:
 ```
-DOMAIN_URL=https://your-domain.com
 TELEGRAM_BOT_TOKEN=your_telegram_bot_token
 TELEGRAM_CHAT_ID=your_telegram_chat_id
+
+# BASE URL
+BASE_URL=http://example.com
 ```
 
 ## 사용 방법

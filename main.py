@@ -17,7 +17,7 @@ BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 def get_image_url(file_path):
     """로컬 이미지 파일의 URL을 생성"""
     # 여기에 실제 이미지가 호스팅되는 베이스 URL을 입력해야 합니다
-    base_url = f'{os.getenv("DOMAIN_URL")}/output'
+    base_url = f'{os.getenv("BASE_URL")}/output'
     return f"{base_url}/{os.path.basename(file_path)}"
 
 def get_unique_filename(output_path):
